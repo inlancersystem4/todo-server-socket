@@ -35,8 +35,12 @@ const io = socketIO(server, {
     }
 });
 
+const user = new Map()
+
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
+    user.set(socket.id,socket.id)
+    console.log("socket user id",user)
     // console.log('Client connected:', socket.handshake.auth.token);
     // console.log('Client connected:', socket.handshake.auth.user_id);
     let token       = null;
@@ -51,7 +55,11 @@ io.on('connection', (socket) => {
         console.log('Token received:', receivedToken);
         token = receivedToken;
     });
-
+socket.on("getUser",()=>{
+    const CurrentUser = user.get(socket.id) 
+    console.log("user..",CurrentUser)
+    socket.emit("getUser",CurrentUser)
+})
     socket.on('toast', (data) => {
         console.log('Toast received:', data);
 
@@ -135,11 +143,14 @@ io.on('connection', (socket) => {
     // Listen for 'read_by' event from the client
     socket.on('read_by', (data) => {
         console.log('Received read_by data:', data);
-
         // Option 1: Emit to all clients (broadcast)
         io.emit('read_by', data);
-
+        
     });
+    socket.on("editing",(data)=>{
+         console.log("editiing data id",data);
+         io.emit("editing",{data,socket:socket.id})
+    })
 
     socket.on('msg_read_by', (data) => {
         console.log("msg_read_by:", data);
