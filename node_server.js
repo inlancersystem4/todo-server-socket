@@ -39,8 +39,6 @@ const user = new Map()
 
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
-    user.set(socket.id,socket.id)
-    console.log("socket user id",user)
     // console.log('Client connected:', socket.handshake.auth.token);
     // console.log('Client connected:', socket.handshake.auth.user_id);
     let token       = null;
@@ -55,11 +53,47 @@ io.on('connection', (socket) => {
         console.log('Token received:', receivedToken);
         token = receivedToken;
     });
-socket.on("getUser",()=>{
-    const CurrentUser = user.get(socket.id) 
-    console.log("user..",CurrentUser)
-    socket.emit("getUser",CurrentUser)
-})
+
+socket.on("createUser", () => {
+    user.set(socket.id, { id: socket.id, active: true });
+    
+    // console.log("User created:", socket.id);
+    // console.log("Current users:", Array.from(user.entries()));
+});
+
+socket.on("getUser", (userId) => {
+    const currentUser = user.get(userId);
+
+    if (!currentUser) {
+        console.log("User not found:", userId);
+        socket.emit("getUser", { error: "User not found" });
+        return;
+    }
+
+    console.log("User retrieved:", currentUser);
+    socket.emit("getUser", currentUser);
+});
+
+socket.on("editing", (data, userId) => {
+    console.log("Editing huahw",userId,socket.id);
+    // if (userId !== socket.id) {
+    //     console.log("editing user ",data,socker);
+    //     io.emit("userBlock", data);
+    //     console.log("User blocked:", socket.id, "Data:", data);
+    // } else {
+    //     console.log("Editing event from:", socket.id, "Data:", );
+    //     io.emit("editing", { data, socket: socket.id });
+    //     user.delete(userId)
+    // }
+
+    io.emit('userBlock',{ data, editing_user:userId});
+    io.emit("userBlockClear")
+
+
+//   socket.on("userBlock",(data)=>{
+
+});
+
     socket.on('toast', (data) => {
         console.log('Toast received:', data);
 
@@ -147,10 +181,6 @@ socket.on("getUser",()=>{
         io.emit('read_by', data);
         
     });
-    socket.on("editing",(data)=>{
-         console.log("editiing data id",data);
-         io.emit("editing",{data,socket:socket.id})
-    })
 
     socket.on('msg_read_by', (data) => {
         console.log("msg_read_by:", data);
