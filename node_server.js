@@ -87,7 +87,6 @@ socket.on("editing", (data, userId) => {
     // }
 
     io.emit('userBlock',{ data, editing_user:userId});
-    io.emit("userBlockClear")
 
 
 //   socket.on("userBlock",(data)=>{
@@ -97,12 +96,12 @@ socket.on("editing", (data, userId) => {
     socket.on('toast', (data) => {
         console.log('Toast received:', data);
 
-        if (token) {
-            data['token'] = token;
+        // if (token) {
+        //     data['token'] = token;
             io.emit('toast', data);
-        } else {
-            console.log('Token not yet received');
-        }
+        // } else {
+        //     console.log('Token not yet received');
+        // }
     });
 
     socket.on('is_replay_on_time', (data) => {
